@@ -1,0 +1,22 @@
+Database:
+  DBType: mysql
+  Username: root
+  Password: 1234ever.A
+  Host: 127.0.0.1:3306
+  DBName: g_server
+  Charset: utf8
+  ParseTime: True
+  MaxIdleConns: 10
+  MaxOpenConns: 30
+Email:
+  ServerHost: smtp.qq.com
+  ServerPort: 465
+  FromEmail: octane0411@qq.com
+  FromPassword: qrprjarssmfacjfi
+App:
+  DefaultPageSize: 10
+  MaxPageSize: 100
+Redis:
+  Addr: localhost:6379
+  Password:
+  DB: 0
