@@ -1,0 +1,18 @@
+
+=== Fri Mar 19 12:01:15 2021
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were removed:
+  com.unity.package-manager-ui@2.2.0
+
+=== Sun Mar  6 14:48:53 2022
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were added:
+  com.unity.ide.visualstudio@2.0.14
+The following packages were updated:
+  com.unity.ide.vscode from version 1.2.3 to 1.2.4
