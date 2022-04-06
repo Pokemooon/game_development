@@ -20,7 +20,7 @@
 
 - [game_development](https://github.com/Pokemooon/game_development)/**Important_doc**/必看必看必看.md
 
-开发内容细则：
+##### 开发内容细则：
 
 - [game_development](https://github.com/Pokemooon/game_development)/**Important_doc**/20194693-软件开发计划文档.doc
 
