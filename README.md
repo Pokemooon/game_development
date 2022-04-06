@@ -24,5 +24,10 @@
 
 - [game_development](https://github.com/Pokemooon/game_development)/**Important_doc**/20194693-软件开发计划文档.doc
 
+##### Scrum：
+
+- 版本迭代发布，游戏主体放在下列路径中
+- [game_development](https://github.com/Pokemooon/game_development)/**our_game_main**
+
 
 
