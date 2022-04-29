@@ -50,7 +50,7 @@ public class PlayerControls : MonoBehaviour
 
     void Update()
     {
-        if(flag)
+        if(flag)////
         {
             isGround = controller.isGrounded; //判断Player是否在地面
             if (isGround && playerVelocity.y < 0)
