@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
+using UnityEngine.EventSystems;
+using Cursor = UnityEngine.Cursor;
 
 /// <summary>
 /// 刚体角色控制器控制角色
@@ -27,6 +30,8 @@ public class PlayerControllerTest01 : MonoBehaviour
     private bool isJump = true;
     public bool isSprintSpeed = false;//冲刺
     public bool isFreeze=false;//冻结关卡一段时间
+    public GameObject CM_FreeLook1;
+    public GameObject ButtonPauseMenu;
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
@@ -49,10 +54,32 @@ public class PlayerControllerTest01 : MonoBehaviour
         SetGravity(this.gameObject,Physics.gravity*2f);
         anim = GetComponent<Animator>();
         Cursor.visible = false;
+        // Cursor.lockState = 0;
     }
 
     private void Update()
     {
+        //0.鼠标识别，只有当鼠标不出现时，才可以进行角色控制
+        //0.1 当菜单没出现时，并且鼠标按下时，原来鼠标看不见->变成鼠标可见，视角不可动
+        if (!ButtonPauseMenu.activeSelf && Input.GetMouseButtonDown(0) &&
+            Cursor.visible == false)
+        {
+            Cursor.visible = true;
+            CM_FreeLook1.SetActive(false);
+        }
+        //0.2 当菜单出现了，鼠标一直可见，进行操作
+        else if (ButtonPauseMenu.activeSelf)
+        {
+            Cursor.visible = true;
+        }
+        //0.3 当菜单关闭后，并且鼠标按下了时，原来鼠标看得见->变成鼠标不可见，视角恢复可动
+        else if (!ButtonPauseMenu.activeSelf && Input.GetMouseButtonDown(0) &&
+                 Cursor.visible)
+        {
+            Cursor.visible = false;
+            CM_FreeLook1.SetActive(true);
+        }
+       
 
         //1.跳跃操作[space]
         //为刚体施加一个向上的力
@@ -62,17 +89,16 @@ public class PlayerControllerTest01 : MonoBehaviour
         {
             Invoke("setSprintSpeed",5);
         }
-
         if (isDoubleJump)
         {
             Invoke("setDoubleJump",8);
         }
-
         if (isFreeze)
         {
             Invoke("setFreeze",5);
             Invoke("setLevel3",5);
         }
+        
         if (Input.GetKeyDown(KeyCode.Space)) {
             if (isGround)
             {
@@ -92,46 +118,33 @@ public class PlayerControllerTest01 : MonoBehaviour
         //读取WASD
         Vector2 movement = movementControl.action.ReadValue<Vector2>();
         moveScale = 0;
-        
-        //2.角色移动操作[WASD]
-        if (movement.x != 0f || movement.y != 0f)
+        if (!Cursor.visible)
         {
-            //相机跟随旋转
-            moveDirection = new Vector3(movement.x, 0, movement.y);
-            moveDirection = cameraMainTransform.forward * moveDirection.z + cameraMainTransform.right * moveDirection.x;
-            moveDirection.y = 0f;
-            //执行移动操作
-            //Vector3 v = Vector3.Project(rigid.velocity, transform.forward);
-            //float s = moveSpeed == 0 ? 0 : 1 - v.magnitude / moveSpeed;
-            //第一种：力驱动，好处：比较真实具体移动交给物理系统；缺点：不好控制，容易滑动
-            //rigid.AddForce(transform.forward * moveScale * s, ForceMode.VelocityChange);
-            //第二种：速度设置，好处：直接设置速度；缺点：直接干涉物理速度，抖动失真
-            //rigid.velocity = transform.forward * 10 * moveScale + Vector3.up * rigid.velocity.y;
-            //第三种：直接物理位置，好处：直接移动，缺点：目前描述不出来
-            if (moveScale == 1) rigid.MovePosition((rigid.position + transform.forward * moveSpeed * Time.deltaTime));
-            anim.SetBool("Run", true);
-            moveScale = 1;
-        }
-        else
-        {
-            anim.SetBool("Run", false);
-            moveScale = 0;
-        }
+            //2.角色移动操作[WASD]
+            if (movement.x != 0f || movement.y != 0f)
+            {
+                //相机跟随旋转
+                moveDirection = new Vector3(movement.x, 0, movement.y);
+                moveDirection = cameraMainTransform.forward * moveDirection.z + cameraMainTransform.right * moveDirection.x;
+                moveDirection.y = 0f;
+                //执行移动操作
+                if (moveScale == 1) rigid.MovePosition((rigid.position + transform.forward * moveSpeed * Time.deltaTime));
+                anim.SetBool("Run", true);
+                moveScale = 1;
+            }
+            else
+            {
+                anim.SetBool("Run", false);
+                moveScale = 0;
+            }
         
-        // //3.旋转操作[mouse control]
-        Quaternion rot = Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, moveDirection, Vector3.up), 0);//目标旋转
-        Quaternion currentRot = Quaternion.RotateTowards(rigid.rotation, rot, Time.deltaTime * 600);//中间插值旋转
-        rigid.MoveRotation(currentRot);
-        
-        //3.旋转操作方式二[mouse control]
-         // if (movement!=Vector2.zero)
-         // {
-         //     float targetAngle = Mathf.Atan2(movement.x, movement.y) * Mathf.Rad2Deg + cameraMainTransform.eulerAngles.y;
-         //     Quaternion rotation = Quaternion.Euler(0f, targetAngle, 0f);
-         //     transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * rotationSpeed);
-         // }
-         
-         //4.掉落水中重新复活
+            // 3.旋转操作[mouse control]
+            Quaternion rot = Quaternion.Euler(0, Vector3.SignedAngle(Vector3.forward, moveDirection, Vector3.up), 0);//目标旋转
+            Quaternion currentRot = Quaternion.RotateTowards(rigid.rotation, rot, Time.deltaTime * 600);//中间插值旋转
+            rigid.MoveRotation(currentRot);
+
+        }
+        //4.掉落水中重新复活
          if (transform.position.y < -90)
          {
              transform.position=new Vector3(1,1,-30);
@@ -216,9 +229,7 @@ public class PlayerControllerTest01 : MonoBehaviour
             Destroy(collision.gameObject);
         }
     }
-    /// <summary>
-    /// 设置物体的重力加速度
-    /// </summary>
+    // 设置物体的重力加速度
     public static void SetGravity(GameObject obj, Vector3 val)
     {
         var c = obj.GetComponent<GravityControl>();
@@ -228,9 +239,7 @@ public class PlayerControllerTest01 : MonoBehaviour
         c.Set(val);
     }
     
-    /// <summary>
-    /// 获取物体的重力加速度
-    /// </summary>
+    // 获取物体的重力加速度
     public static Vector3 GetGravity(GameObject obj)
     {
         var c = obj.GetComponent<GravityControl>();
