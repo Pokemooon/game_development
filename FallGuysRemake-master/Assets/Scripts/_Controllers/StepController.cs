@@ -11,10 +11,6 @@ public class StepController : MonoBehaviour
     public float lDistance = 10;
     public float rDistance = 10;
     public char choose = 'x';
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()

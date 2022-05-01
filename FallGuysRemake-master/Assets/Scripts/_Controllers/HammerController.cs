@@ -18,12 +18,7 @@ public class HammerController : MonoBehaviour
     {
         mRigid = GetComponent<Rigidbody>();
     }
-
-    private void Start()
-    {
-        Application.targetFrameRate = 5;
-    }
-
+    
     // Update is called once per frame
     private void FixedUpdate()
     {

@@ -13,6 +13,14 @@ TagManager:
   - Trigger2
   - ChangeSpeed1
   - ChangeSpeed2
+  - Obstacle
+  - SpecialShoes
+  - Rocket
+  - ThreeHoleFly
+  - ManyHoleFly
+  - ThreeHoleDes
+  - ManyHoleDes
+  - RingCandy
   layers:
   - Default
   - TransparentFX
@@ -31,7 +39,7 @@ TagManager:
   - SanLian
   - Trigger
   - CaiDan
-  - 
+  - Candy
   - 
   - 
   - 

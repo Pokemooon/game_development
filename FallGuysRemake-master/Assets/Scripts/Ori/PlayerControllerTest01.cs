@@ -11,6 +11,7 @@ public class PlayerControllerTest01 : MonoBehaviour
 {
     Rigidbody rigid;
     public float moveSpeed;
+    public float sprintSpeed = 18;
     private Vector3 moveDirection = Vector3.zero;//角色的方向
     float moveScale = 0;
     //addtional
@@ -22,6 +23,10 @@ public class PlayerControllerTest01 : MonoBehaviour
     public bool isGround=true;
     private Transform cameraMainTransform;
     private Animator anim;
+    public bool isDoubleJump = false;//二段跳
+    private bool isJump = true;
+    public bool isSprintSpeed = false;//冲刺
+    public bool isFreeze=false;//冻结关卡一段时间
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
@@ -53,13 +58,34 @@ public class PlayerControllerTest01 : MonoBehaviour
         //为刚体施加一个向上的力
         //该力是由向上的跳跃速度和在刚体原速度方向上的一个速度合成的
         //VelocityChange是一个瞬时速度
+        if (isSprintSpeed)
+        {
+            Invoke("setSprintSpeed",5);
+        }
+
+        if (isDoubleJump)
+        {
+            Invoke("setDoubleJump",8);
+        }
+
+        if (isFreeze)
+        {
+            Invoke("setFreeze",5);
+            Invoke("setLevel3",5);
+        }
         if (Input.GetKeyDown(KeyCode.Space)) {
             if (isGround)
             {
                 // transform.Translate(transform.up*Time.deltaTime*jumpSpeed);
                 rigid.AddForce(transform.up*jumpSpeed,ForceMode.VelocityChange);
                 anim.SetBool("Jump",true);
+                isJump = true;
                 isGround = false;
+            }
+            else if (isDoubleJump && !isGround && isJump)
+            {
+                rigid.AddForce(transform.up*jumpSpeed,ForceMode.VelocityChange);
+                isJump = false;
             }
         }
         
@@ -110,11 +136,20 @@ public class PlayerControllerTest01 : MonoBehaviour
          {
              transform.position=new Vector3(1,1,-30);
          }
+         //5.冲刺
+         
+         
     }
 
     private void FixedUpdate()
     {
-        if (moveScale == 1) rigid.MovePosition((rigid.position + transform.forward * moveSpeed * Time.fixedDeltaTime));
+        if (moveScale == 1)
+        {
+            if (Input.GetKey(KeyCode.LeftShift)&&isSprintSpeed)
+                rigid.MovePosition(rigid.position + transform.forward * sprintSpeed * Time.fixedDeltaTime);
+            else 
+                rigid.MovePosition(rigid.position + transform.forward * moveSpeed * Time.fixedDeltaTime);
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -123,6 +158,62 @@ public class PlayerControllerTest01 : MonoBehaviour
         {
             isGround = true;
             anim.SetBool("Jump",false);
+        }
+
+        if (collision.gameObject.tag=="RingCandy")//如果使用戒指糖果，则大摆锤全部静止，小推手全部静止，5秒
+        {
+            // Debug.Log("销毁"+collision.gameObject.tag);
+            Destroy(collision.gameObject);
+            isFreeze = true;
+            setLevel3();
+        }
+
+        if (collision.gameObject.tag == "ManyHoleFly")//如果使用多转盘羽毛，则直接飞到独木桥底部
+        {
+            
+            // Debug.Log("销毁"+collision.gameObject.tag);
+            Destroy(collision.gameObject);
+            rigid.AddForce(transform.up*20,ForceMode.VelocityChange);//角色先起飞
+            GameObject flag = GameObject.Find("翅膀_目的地");
+            transform.LookAt(flag.transform);
+            rigid.AddForce(transform.forward*13,ForceMode.VelocityChange);
+        }
+        
+        if (collision.gameObject.tag == "ManyHoleDes")
+        {
+            // Debug.Log("销毁"+collision.gameObject.tag);
+            Destroy(collision.gameObject);
+        }
+        
+        if (collision.gameObject.tag == "ThreeHoleFly")//如果使用三转盘羽毛，则直接飞到独木桥底部
+        {
+            
+            // Debug.Log("销毁"+collision.gameObject.tag);
+            Destroy(collision.gameObject);
+            rigid.AddForce(transform.up*25,ForceMode.VelocityChange);//角色先起飞
+            GameObject flag = GameObject.Find("翅膀_目的地2");
+            transform.LookAt(flag.transform);
+            rigid.AddForce(transform.forward*10,ForceMode.VelocityChange);
+        }
+        
+        if (collision.gameObject.tag == "ThreeHoleDes")
+        {
+            // Debug.Log("销毁"+collision.gameObject.tag);
+            Destroy(collision.gameObject);
+        }
+        
+        if (collision.gameObject.tag == "Rocket")//如果使用火箭冲刺，则可以用sprintspeed冲刺，5秒
+        {
+            isSprintSpeed = true;
+            // Debug.Log("销毁"+collision.gameObject.tag);
+            Destroy(collision.gameObject);
+        }
+
+        if (collision.gameObject.tag == "SpecialShoes")//如果使用特殊羽毛鞋，则可以进行二段跳，8秒
+        {
+            isDoubleJump = true;
+            // Debug.Log("销毁"+collision.gameObject.tag);
+            Destroy(collision.gameObject);
         }
     }
     /// <summary>
@@ -147,5 +238,53 @@ public class PlayerControllerTest01 : MonoBehaviour
             return Physics.gravity;
         else
             return c.Get();
+    }
+
+    private void setSprintSpeed()
+    {
+        isSprintSpeed = false;
+    }
+
+    private void setDoubleJump()
+    {
+        isDoubleJump = false;
+    }
+
+    private void setFreeze()
+    {
+        isFreeze = false;
+    }
+
+    private void setLevel3()
+    {
+        if (isFreeze == true)
+        {
+            GameObject.Find("/---Scene---/Level1-3/hummer_1/hummer_single_color_1").GetComponent<HammerController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/hummer_2/hummer_single_color_2").GetComponent<HammerController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/hummer_3/hummer_ball_1").GetComponent<HammerController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/hummer_4/hummer_ball_2").GetComponent<HammerController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle/MovingStick").GetComponent<HorizontalController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_1/MovingStick").GetComponent<HorizontalController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_2/MovingStick").GetComponent<HorizontalController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_3/MovingStick").GetComponent<HorizontalController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_4/MovingStick").GetComponent<HorizontalController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_5/MovingStick").GetComponent<HorizontalController>().enabled = false;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_6/MovingStick").GetComponent<HorizontalController>().enabled = false;
+        }
+        else if (isFreeze == false)
+        {
+            GameObject.Find("/---Scene---/Level1-3/hummer_1/hummer_single_color_1").GetComponent<HammerController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/hummer_2/hummer_single_color_2").GetComponent<HammerController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/hummer_3/hummer_ball_1").GetComponent<HammerController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/hummer_4/hummer_ball_2").GetComponent<HammerController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle/MovingStick").GetComponent<HorizontalController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_1/MovingStick").GetComponent<HorizontalController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_2/MovingStick").GetComponent<HorizontalController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_3/MovingStick").GetComponent<HorizontalController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_4/MovingStick").GetComponent<HorizontalController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_5/MovingStick").GetComponent<HorizontalController>().enabled = true;
+            GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_6/MovingStick").GetComponent<HorizontalController>().enabled = true;
+        }
+        
     }
 }
