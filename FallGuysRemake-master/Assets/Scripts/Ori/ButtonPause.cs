@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ButtonPause : MonoBehaviour {
 
@@ -22,7 +23,12 @@ public class ButtonPause : MonoBehaviour {
     public void OnRestart()//点击“重新开始”时执行此方法
     {
         //Loading Scene0
-        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         Time.timeScale = 1f;
+    }
+
+    public void onSave()//把当前人物的位置信息保存到数据库中
+    {
+        
     }
 }

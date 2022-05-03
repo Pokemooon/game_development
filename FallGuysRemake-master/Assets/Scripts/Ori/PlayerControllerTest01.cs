@@ -32,6 +32,15 @@ public class PlayerControllerTest01 : MonoBehaviour
     public bool isFreeze=false;//冻结关卡一段时间
     public GameObject CM_FreeLook1;
     public GameObject ButtonPauseMenu;
+    public AudioSource Vectory;
+    public AudioSource Vectory2;
+    public bool vector_flag = true;
+    public AudioSource Candy_music;
+    public AudioSource Fly_music;
+    public AudioSource Jump_music;
+    public AudioSource Sprint_music;
+    public AudioSource Revive_music;
+    public AudioSource Obstacle_music;
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
@@ -110,7 +119,8 @@ public class PlayerControllerTest01 : MonoBehaviour
             }
             else if (isDoubleJump && !isGround && isJump)
             {
-                rigid.AddForce(transform.up*jumpSpeed,ForceMode.VelocityChange);
+                rigid.AddForce(transform.up*jumpSpeed*2,ForceMode.VelocityChange);
+                Jump_music.Play();
                 isJump = false;
             }
         }
@@ -144,27 +154,52 @@ public class PlayerControllerTest01 : MonoBehaviour
             rigid.MoveRotation(currentRot);
 
         }
-        //4.掉落水中重新复活
-         if (transform.position.y < -90)
+        //4.判断是否掉入水中
+         if (transform.position.y < -60)
          {
-             transform.position=new Vector3(1,1,-30);
+             Revive_music.Play();
+             revive();
          }
-         //5.冲刺
-         
-         
+
+
     }
 
+    // 判断复活点
+    private void revive()
+    {
+        if (transform.position.z > -31 && transform.position.z < 115)
+            transform.position = new Vector3(1, 1, -30);
+        else if (transform.position.z >= 115 && transform.position.z < 184)
+            transform.position = new Vector3(9, 27, 115);
+        else if (transform.position.z >= 184 && transform.position.z < 242)
+            transform.position = new Vector3(9, 27, 184);
+        else if (transform.position.z >= 242 && transform.position.z < 316)
+            transform.position = new Vector3(-1, 1, 242);
+        else if (transform.position.z >= 316 && transform.position.z < 385)
+            transform.position = new Vector3(-3, 1, 316);
+        else if (transform.position.z >= 385 && transform.position.z < 450)
+            transform.position = new Vector3(0, 1, 385);
+        else if (transform.position.z >= 450 && transform.position.z < 556)
+            transform.position = new Vector3(0, 1, 450);
+        else if (transform.position.z >= 556)
+            transform.position = new Vector3(1, 1, -30);
+    }
+    // 刚体移动
     private void FixedUpdate()
     {
         if (moveScale == 1)
         {
-            if (Input.GetKey(KeyCode.LeftShift)&&isSprintSpeed)
+            if (Input.GetKey(KeyCode.LeftShift) && isSprintSpeed)
+            {
                 rigid.MovePosition(rigid.position + transform.forward * sprintSpeed * Time.fixedDeltaTime);
+                Sprint_music.Play();
+            }
             else 
                 rigid.MovePosition(rigid.position + transform.forward * moveSpeed * Time.fixedDeltaTime);
         }
     }
 
+    // 碰撞机制
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.layer == 10)
@@ -177,6 +212,7 @@ public class PlayerControllerTest01 : MonoBehaviour
         {
             // Debug.Log("销毁"+collision.gameObject.tag);
             Destroy(collision.gameObject);
+            Candy_music.Play();
             isFreeze = true;
             setLevel3();
         }
@@ -186,6 +222,8 @@ public class PlayerControllerTest01 : MonoBehaviour
             
             // Debug.Log("销毁"+collision.gameObject.tag);
             Destroy(collision.gameObject);
+            Fly_music.Play();
+            Invoke("StopFlyMusic",3f);
             rigid.AddForce(transform.up*20,ForceMode.VelocityChange);//角色先起飞
             GameObject flag = GameObject.Find("翅膀_目的地");
             transform.LookAt(flag.transform);
@@ -203,10 +241,12 @@ public class PlayerControllerTest01 : MonoBehaviour
             
             // Debug.Log("销毁"+collision.gameObject.tag);
             Destroy(collision.gameObject);
+            Fly_music.Play();
+            Invoke("StopFlyMusic",3f);
             rigid.AddForce(transform.up*25,ForceMode.VelocityChange);//角色先起飞
             GameObject flag = GameObject.Find("翅膀_目的地2");
             transform.LookAt(flag.transform);
-            rigid.AddForce(transform.forward*10,ForceMode.VelocityChange);
+            rigid.AddForce(transform.forward*8,ForceMode.VelocityChange);
         }
         
         if (collision.gameObject.tag == "ThreeHoleDes")
@@ -220,6 +260,7 @@ public class PlayerControllerTest01 : MonoBehaviour
             isSprintSpeed = true;
             // Debug.Log("销毁"+collision.gameObject.tag);
             Destroy(collision.gameObject);
+            Candy_music.Play();
         }
 
         if (collision.gameObject.tag == "SpecialShoes")//如果使用特殊羽毛鞋，则可以进行二段跳，8秒
@@ -227,6 +268,24 @@ public class PlayerControllerTest01 : MonoBehaviour
             isDoubleJump = true;
             // Debug.Log("销毁"+collision.gameObject.tag);
             Destroy(collision.gameObject);
+            Candy_music.Play();
+        }
+
+        if (collision.gameObject.tag == "EndFlag"&&vector_flag)
+        {
+            Vectory.Play();
+            Vectory2.Play();
+            vector_flag = false;
+        }
+
+        if (collision.gameObject.tag == "Trampoline")
+        {
+            Jump_music.Play();
+        }
+
+        if (collision.gameObject.tag == "Obstacle")
+        {
+            Obstacle_music.Play();
         }
     }
     // 设置物体的重力加速度
@@ -249,21 +308,25 @@ public class PlayerControllerTest01 : MonoBehaviour
             return c.Get();
     }
 
+    // 解除加速
     private void setSprintSpeed()
     {
         isSprintSpeed = false;
     }
 
+    // 解除二段跳
     private void setDoubleJump()
     {
         isDoubleJump = false;
     }
 
+    // 解除冻结
     private void setFreeze()
     {
         isFreeze = false;
     }
 
+    // 解除冻结2
     private void setLevel3()
     {
         if (isFreeze == true)
@@ -295,5 +358,11 @@ public class PlayerControllerTest01 : MonoBehaviour
             GameObject.Find("/---Scene---/Level1-3/half-donut-obstacle_6/MovingStick").GetComponent<HorizontalController>().enabled = true;
         }
         
+    }
+    
+    //解除飞翔声音
+    private void StopFlyMusic()
+    {
+        Fly_music.Stop();
     }
 }

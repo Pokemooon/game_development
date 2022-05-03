@@ -21,6 +21,8 @@ TagManager:
   - ThreeHoleDes
   - ManyHoleDes
   - RingCandy
+  - EndFlag
+  - Trampoline
   layers:
   - Default
   - TransparentFX
@@ -30,16 +32,16 @@ TagManager:
   - UI
   - 
   - 
-  - Player
-  - Enemy
-  - Ground
-  - Wall
-  - Door
-  - EndFlag
-  - SanLian
-  - Trigger
-  - CaiDan
-  - Candy
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
   - 
   - 
   - 
