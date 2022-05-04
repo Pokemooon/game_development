@@ -32,6 +32,7 @@ public class PlayerControllerTest01 : MonoBehaviour
     public bool isFreeze=false;//冻结关卡一段时间
     public GameObject CM_FreeLook1;
     public GameObject ButtonPauseMenu;
+    public GameObject ButtonSaveMenu;
     public AudioSource Vectory;
     public AudioSource Vectory2;
     public bool vector_flag = true;
@@ -41,6 +42,10 @@ public class PlayerControllerTest01 : MonoBehaviour
     public AudioSource Sprint_music;
     public AudioSource Revive_music;
     public AudioSource Obstacle_music;
+    private int flag_pos=0;
+    private int x_pos=0;
+    private int y_pos=0;
+    private int z_pos=0;
     private void Awake()
     {
         rigid = GetComponent<Rigidbody>();
@@ -59,6 +64,15 @@ public class PlayerControllerTest01 : MonoBehaviour
 
     private void Start()
     {
+        if (GameObject.Find("flag_position")!=null)
+        {
+            flag_pos = GameObject.Find("flag_position").GetComponent<GameData>().param;
+            x_pos = GameObject.Find("x_position").GetComponent<GameData>().param;
+            y_pos = GameObject.Find("y_position").GetComponent<GameData>().param;
+            z_pos = GameObject.Find("z_position").GetComponent<GameData>().param;
+            GameObject.Find("FallGuysPlayer1").transform.position = new Vector3(x_pos, y_pos, z_pos);
+            Destroy(GameObject.Find("flag_position"));
+        }
         cameraMainTransform = Camera.main.transform;
         SetGravity(this.gameObject,Physics.gravity*2f);
         anim = GetComponent<Animator>();
@@ -70,19 +84,19 @@ public class PlayerControllerTest01 : MonoBehaviour
     {
         //0.鼠标识别，只有当鼠标不出现时，才可以进行角色控制
         //0.1 当菜单没出现时，并且鼠标按下时，原来鼠标看不见->变成鼠标可见，视角不可动
-        if (!ButtonPauseMenu.activeSelf && Input.GetMouseButtonDown(0) &&
+        if (!ButtonSaveMenu.activeSelf&&!ButtonPauseMenu.activeSelf && Input.GetMouseButtonDown(0) &&
             Cursor.visible == false)
         {
             Cursor.visible = true;
             CM_FreeLook1.SetActive(false);
         }
         //0.2 当菜单出现了，鼠标一直可见，进行操作
-        else if (ButtonPauseMenu.activeSelf)
+        else if (ButtonPauseMenu.activeSelf||ButtonSaveMenu.activeSelf)
         {
             Cursor.visible = true;
         }
         //0.3 当菜单关闭后，并且鼠标按下了时，原来鼠标看得见->变成鼠标不可见，视角恢复可动
-        else if (!ButtonPauseMenu.activeSelf && Input.GetMouseButtonDown(0) &&
+        else if (!ButtonSaveMenu.activeSelf&&!ButtonPauseMenu.activeSelf && Input.GetMouseButtonDown(0) &&
                  Cursor.visible)
         {
             Cursor.visible = false;

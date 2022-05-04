@@ -23,6 +23,7 @@ TagManager:
   - RingCandy
   - EndFlag
   - Trampoline
+  - SaveMessage
   layers:
   - Default
   - TransparentFX
@@ -32,16 +33,16 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Enemy
+  - Ground
+  - Wall
+  - Door
+  - EndFlag
+  - SanLian
+  - Trigger
+  - CaiDan
+  - Candy
   - 
   - 
   - 
